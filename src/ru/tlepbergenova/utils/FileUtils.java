@@ -20,6 +20,7 @@ public class FileUtils {
 
     /**
      * функция разделяет общий файл на несколько (по 7 MB)
+     * и кладет их в dir с названием nameNewFile
      *
      * @param nameBigFile - название общего файла с логами
      * @param nameNewFile - постоянная часть названий разбитых фалов
@@ -27,7 +28,7 @@ public class FileUtils {
      *                    nameNewFile_2 итд
      */
     public static void splitFile(String nameBigFile, String nameNewFile) {
-        String dir = ".\\" + nameBigFile + "_logs\\";
+        String dir = ".\\" + nameNewFile + "_logs\\";
         boolean mkdirs = new File(dir).mkdirs();
         int partCounter = 0;
         int sizeOfFiles = 1024 * 1024 * 7;// 7MB
@@ -49,13 +50,16 @@ public class FileUtils {
     }
 
     /**
+     * Функция, которая по регулярному выражению находит строку в файле, в которую входит
+     * данное выражение и копирует в новый файл
+     *
      * @param regularExpression - регулярное выражение, по котором ищем совпадение в логах
-     * @param pathToFiles       - путь до файла(ов) в которых осуществляется поиск
+     * @param pathToFile        - путь до файла, в которых осуществляется поиск
      * @param nameNewFile       - имя нового файла, в который записывается результат поиска
      */
-    public static void findInFile(String regularExpression, String pathToFiles, String nameNewFile) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(pathToFiles));
-             BufferedWriter writer = new BufferedWriter(new FileWriter(nameNewFile))) {
+    public static void findInFile(String regularExpression, String pathToFile, String nameNewFile) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(pathToFile));
+             BufferedWriter writer = new BufferedWriter(new FileWriter(nameNewFile, true))) {
             List<String> findLogs = reader
                     .lines()
                     .map(String::valueOf)
@@ -63,10 +67,38 @@ public class FileUtils {
                     .collect(Collectors.toList());
 
             for (String findLog : findLogs) {
-                writer.write(findLog);
+                writer.write(findLog + '\n');
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * Функция, которая по регулярному выражению находит строку в файле/фалах, в которую входит
+     * данное выражение и копирует в новый файл. Если в аргументе передан файл до директории,
+     * будет осуществлен поиск оп каждому файлу внутри директории (рекурсивно)
+     *
+     * @param regularExpression - регулярное выражение, по котором ищем совпадение в логах
+     * @param pathToFiles       - путь до файла/директории с файлами, в которых осуществляется поиск
+     * @param nameNewFile       - имя нового файла, в который записывается результат поиска
+     */
+    public static void findInFiles(String regularExpression, String pathToFiles, String nameNewFile) {
+        File files = new File(pathToFiles);
+        boolean isDir = files.isDirectory();
+        if (!isDir) {
+            findInFile(regularExpression, pathToFiles, nameNewFile);
+        } else {
+            String[] nameFiles = files.list();
+            assert nameFiles != null;
+            for (String nameFile : nameFiles) {
+                isDir = new File(pathToFiles + nameFile).isDirectory();
+                if (isDir) {
+                    findInFiles(regularExpression, pathToFiles + nameFile, nameNewFile);
+                } else {
+                    findInFile(regularExpression, pathToFiles + nameFile, nameNewFile);
+                }
+            }
         }
     }
 }
