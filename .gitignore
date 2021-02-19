@@ -15,7 +15,6 @@ main.log.2014-11-17*
 .DS_Store
 
 # Package Files #
-*.jar
 *.war
 *.ear
 *.log
