@@ -141,7 +141,7 @@ public class Logs {
 
     /**
      * Функция, которая добавляет разделитель в файл из списка с логами
-     * Новый файл с результатом создается в директории программы.
+     * Новый файл с результатом создается в директории программы в формате csv.
      * Пример: 17.11.2014;11:43:51.347;TRACE:;9.6.25.83:54650;Count is 1157
      * !При изменении структуры логов изменить расположение добавления разделителя!
      *
@@ -151,7 +151,7 @@ public class Logs {
      */
     public static void addSeparatorInFile(String separator, File file, String nameNewFile) {
         try (BufferedReader reader = new BufferedReader(new FileReader(file));
-             BufferedWriter writer = new BufferedWriter(new FileWriter(nameNewFile, true))) {
+             BufferedWriter writer = new BufferedWriter(new FileWriter(nameNewFile + ".csv", true))) {
             List<String> findLogs = reader
                     .lines()
                     .map(String::valueOf)
@@ -160,7 +160,7 @@ public class Logs {
                             "(?=\\d{2}:\\d{2}:\\d{2}\\.\\d{3})", separator))
                     .map(s -> s.replaceAll("(?<=\\d{2}:\\d{2}:\\d{2}\\.\\d{3})\\s" +
                             "(?=.+?:)", separator))
-                    .map(s -> s.replaceAll("(?<=[A-Z])\\s" +
+                    .map(s -> s.replaceAll("(?<=\\w{1,5}\\s?:)\\s" +
                             "(?=.+?)", separator))
                     .map(s -> s + separator)
                     .collect(Collectors.toList());

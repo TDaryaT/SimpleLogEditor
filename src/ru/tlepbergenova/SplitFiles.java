@@ -2,8 +2,6 @@ package ru.tlepbergenova;
 
 import ru.tlepbergenova.utils.Logs;
 
-import static ru.tlepbergenova.utils.Logs.splitFile;
-
 /**
  * Консольное приложение, позволяющее разделить один файл на несколько
  * новые файлы помещаются в отдельную папку,
